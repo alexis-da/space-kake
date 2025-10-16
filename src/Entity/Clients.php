@@ -39,6 +39,9 @@ class Clients
     #[ORM\OneToMany(targetEntity: Orders::class, mappedBy: 'client')]
     private Collection $orders;
 
+    #[ORM\Column]
+    private ?bool $isAdmin = null;
+
     public function __construct()
     {
         $this->reviews = new ArrayCollection();
@@ -154,6 +157,18 @@ class Clients
                 $order->setClient(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isAdmin(): ?bool
+    {
+        return $this->isAdmin;
+    }
+
+    public function setIsAdmin(bool $isAdmin): static
+    {
+        $this->isAdmin = $isAdmin;
 
         return $this;
     }
