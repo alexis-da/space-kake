@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Cakes{% endblock %}
+
+{% block main %}
+    <h1>Create new Cakes</h1>
+
+    {{ include('cakes/_form.html.twig') }}
+
+    <a href="{{ path('app_cakes_index') }}">back to list</a>
+{% endblock main %}

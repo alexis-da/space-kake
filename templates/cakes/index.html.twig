@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Cakes{% endblock %}
+
+{% block main %}
+    <h1>Cakes index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Image</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for cake in cakes %}
+            <tr>
+                <td>{{ cake.title }}</td>
+                <td>{{ cake.description }}</td>
+                <td>{{ cake.price }}</td>
+                <td>{{ cake.quantity }}</td>
+                <td><img src="{{ cake.image }}" alt=""></td>
+                <td>
+                    <a href="{{ path('app_cakes_show', {'id': cake.id}) }}">show</a>
+                    <a href="{{ path('app_cakes_edit', {'id': cake.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="7">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_cakes_new') }}">Create new</a>
+{% endblock main %}
