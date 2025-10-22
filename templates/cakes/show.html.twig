@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Cakes{% endblock %}
+
+{% block main %}
+    <h1>Cakes</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Title</th>
+                <td>{{ cake.title }}</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>{{ cake.description }}</td>
+            </tr>
+            <tr>
+                <th>Price</th>
+                <td>{{ cake.price }}</td>
+            </tr>
+            <tr>
+                <th>Quantity</th>
+                <td>{{ cake.quantity }}</td>
+            </tr>
+            <tr>
+                <th>Image</th>
+                <td>{{ cake.image }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_cakes_index') }}">back to list</a>
+
+    <a href="{{ path('app_cakes_edit', {'id': cake.id}) }}">edit</a>
+
+    {{ include('cakes/_delete_form.html.twig') }}
+{% endblock main %}
