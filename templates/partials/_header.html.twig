@@ -9,7 +9,7 @@
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
     >
-    <title>{% block title %}{% endblock title %}</title>
+    <title>{% block title %} {% endblock title %}</title>
 
 </head>
 
@@ -23,6 +23,7 @@
             {% if app.user %}
                 <li>Bonjour, {{ app.user.getFirstname() }} !</li>
                 <li><a href="{{ path('app_logout') }}">Déconnexion</a></li>
+               <li><a href="{{ path('app_reviews_index') }}">Avis</a></li>
                 <li><a href="{{ path('orders_show') }}">🛒</a></li>
             {% else %}
                 <li><a href="{{ path('app_login') }}">Connexion</a></li>

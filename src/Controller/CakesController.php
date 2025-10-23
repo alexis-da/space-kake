@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Cakes;
 use App\Form\CakesType;
+use App\Repository\CakeOrderRepository;
 use App\Repository\CakesRepository;
 use App\Repository\OrdersRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,10 +18,12 @@ use Psr\Log\LoggerInterface;
 final class CakesController extends AbstractController
 {
     #[Route(name: 'app_cakes_index', methods: ['GET'])]
-    public function index(CakesRepository $cakesRepository): Response
+    public function index(CakesRepository $cakesRepository, CakeOrderRepository $cakeOrderRepository): Response
     {
+        $orders = $cakeOrderRepository->findAll();
         return $this->render('cakes/index.html.twig', [
             'cakes' => $cakesRepository->findAll(),
+            'orders' => $orders
         ]);
     }
 
