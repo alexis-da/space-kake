@@ -40,4 +40,47 @@ class OrdersRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    public function findActiveCartByClient(?\Symfony\Component\Security\Core\User\UserInterface $user): ?Orders
+    {
+        if (!$user) {
+            return null;
+        }
+
+        return $this->createQueryBuilder('o')
+            ->andWhere('o.client = :user')
+            ->andWhere('o.is_paid = false')
+            ->setParameter('user', $user)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function findCurrentCart(Clients $user): ?Orders
+    {
+        return $this->createQueryBuilder('o')
+            ->where('o.client = :user')
+            ->andWhere('o.is_paid = :isPaid')
+            ->setParameters([
+                'user' => $user,
+                'isPaid' => false
+            ])
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function findCartWithLock(Clients $client): ?Orders
+    {
+        return $this->createQueryBuilder('o')
+            ->where('o.client = :client')
+            ->andWhere('o.is_paid = :isPaid')
+            ->setParameters([
+                'client' => $client,
+                'isPaid' => false
+            ])
+            ->setLockMode(\Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
 }
