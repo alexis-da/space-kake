@@ -12,8 +12,11 @@
             <th>Description</th>
             <th>Price</th>
             <th>Quantity</th>
+            <th>Note</th>
             <th>Image</th>
+            {% if app.user and app.user.isAdmin %}
             <th>Actions</th>
+            {% endif %}
             <th>Ajouter au panier</th>
         </tr>
         </thead>
@@ -24,6 +27,7 @@
                 <td>{{ cake.description }}</td>
                 <td>{{ cake.price }}</td>
                 <td>{{ cake.quantity }}</td>
+                <td>{{ cake. }}</td>
                 <td>
                     {% if cake.image %}
                         <img src="{{ cake.image }}" alt="" style="max-width: 100px;">
