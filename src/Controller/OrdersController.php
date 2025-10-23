@@ -18,7 +18,7 @@ use Throwable;
 
 class OrdersController extends AbstractController
 {
-    
+
 
     #[Route('/orders', name: 'orders_show')]
     public function showOrders(EntityManagerInterface $em): Response
@@ -187,7 +187,7 @@ class OrdersController extends AbstractController
         return $total;
     }
 
-    private function calculateCartTotal(Orders $cart): float 
+    private function calculateCartTotal(Orders $cart): float
     {
         return array_reduce(
             $cart->getCakeOrders()->toArray(),
@@ -283,4 +283,25 @@ class OrdersController extends AbstractController
         $this->addFlash('success', 'Commande validée avec succès !');
         return $this->redirectToRoute('app_cakes_index');
     }
+
+    #[Route('/cart/count', name: 'cart_count')]
+    public function cartCount(Security $security, OrdersRepository $ordersRepo): Response
+    {
+        $user = $security->getUser();
+        $count = 0;
+
+        if ($user instanceof Clients) {
+            $cart = $ordersRepo->findOneBy(['client' => $user, 'is_paid' => false]);
+            if ($cart) {
+                foreach ($cart->getCakeOrders() as $co) {
+                    $count += $co->getQuantityCake();
+                }
+            }
+        }
+
+        return $this->render('partials/_cart_count.html.twig', [
+            'count' => $count,
+        ]);
+    }
+
 }
