@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+    >
+    <title>{% block title %}{% endblock title %}</title>
+
+</head>
+
+<header>
+    <nav>
+
+        <ul>
+            <li><a href="{{ path('app_cakes_index') }}">Tout nos gateaux</a></li>
+            <li><a href="{{ path('app_categories_index') }}">Toutes nos  categories</a></li>
+
+            {% if app.user %}
+                <li>Bonjour, {{ app.user.getFirstname() }} !</li>
+                <li><a href="{{ path('app_logout') }}">Déconnexion</a></li>
+                <li><a href="{{ path('orders_show') }}">🛒</a></li>
+            {% else %}
+                <li><a href="{{ path('app_login') }}">Connexion</a></li>
+                <li><a href="{{ path('app_register') }}">Inscription</a></li>
+            {% endif %}
+
+        </ul>
+    </nav>
+
+</header>
+

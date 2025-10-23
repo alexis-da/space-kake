@@ -6,9 +6,13 @@ use App\Repository\ClientsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: ClientsRepository::class)]
-class Clients
+#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
+class Clients implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -21,11 +25,11 @@ class Clients
     #[ORM\Column(length: 50)]
     private ?string $firstname = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $pwd = null;
+    private ?string $password = null;
 
     /**
      * @var Collection<int, Reviews>
@@ -40,13 +44,17 @@ class Clients
     private Collection $orders;
 
     #[ORM\Column]
-    private ?bool $isAdmin = null;
+    private ?bool $isAdmin = false;
 
     public function __construct()
     {
         $this->reviews = new ArrayCollection();
         $this->orders = new ArrayCollection();
     }
+
+    // -----------------------------
+    // Getters / Setters de base
+    // -----------------------------
 
     public function getId(): ?int
     {
@@ -61,7 +69,6 @@ class Clients
     public function setName(string $name): static
     {
         $this->name = $name;
-
         return $this;
     }
 
@@ -73,7 +80,6 @@ class Clients
     public function setFirstname(string $firstname): static
     {
         $this->firstname = $firstname;
-
         return $this;
     }
 
@@ -85,21 +91,46 @@ class Clients
     public function setEmail(string $email): static
     {
         $this->email = $email;
-
         return $this;
     }
 
-    public function getPwd(): ?string
+    // -----------------------------
+    // Password / Security
+    // -----------------------------
+
+    public function getPassword(): ?string
     {
-        return $this->pwd;
+        return $this->password;
     }
 
-    public function setPwd(string $pwd): static
+    public function setPassword(string $password): static
     {
-        $this->pwd = $pwd;
-
+        $this->password = $password;
         return $this;
     }
+
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    public function getRoles(): array
+    {
+        $roles = ['ROLE_USER'];
+        if ($this->isAdmin) {
+            $roles[] = 'ROLE_ADMIN';
+        }
+        return array_unique($roles);
+    }
+
+    public function eraseCredentials(): void
+    {
+        // Si tu stockes des infos sensibles temporaires, efface-les ici.
+    }
+
+    // -----------------------------
+    // Relations : Reviews
+    // -----------------------------
 
     /**
      * @return Collection<int, Reviews>
@@ -122,7 +153,6 @@ class Clients
     public function removeReview(Reviews $review): static
     {
         if ($this->reviews->removeElement($review)) {
-            // set the owning side to null (unless already changed)
             if ($review->getClient() === $this) {
                 $review->setClient(null);
             }
@@ -130,6 +160,10 @@ class Clients
 
         return $this;
     }
+
+    // -----------------------------
+    // Relations : Orders
+    // -----------------------------
 
     /**
      * @return Collection<int, Orders>
@@ -152,7 +186,6 @@ class Clients
     public function removeOrder(Orders $order): static
     {
         if ($this->orders->removeElement($order)) {
-            // set the owning side to null (unless already changed)
             if ($order->getClient() === $this) {
                 $order->setClient(null);
             }
@@ -160,6 +193,10 @@ class Clients
 
         return $this;
     }
+
+    // -----------------------------
+    // Admin
+    // -----------------------------
 
     public function isAdmin(): ?bool
     {
@@ -169,7 +206,6 @@ class Clients
     public function setIsAdmin(bool $isAdmin): static
     {
         $this->isAdmin = $isAdmin;
-
         return $this;
     }
 }
