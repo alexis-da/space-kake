@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ReviewsRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ReviewsRepository::class)]
 class Reviews
@@ -20,6 +21,13 @@ class Reviews
     private ?string $content = null;
 
     #[ORM\Column]
+    #[Assert\Range(
+        min: 1,
+        max: 5,
+        notInRangeMessage: 'La note doit être comprise entre {{ min }} et {{ max }}.',
+        invalidMessage: 'La note doit être un nombre valide.'
+    )]
+    #[Assert\NotNull(message: 'La note est obligatoire.')]
     private ?int $note = null;
 
     #[ORM\ManyToOne(inversedBy: 'reviews')]
@@ -66,6 +74,11 @@ class Reviews
 
     public function setNote(?int $note): static
     {
+        // Validation côté code pour s'assurer que la note est entre 1 et 5
+        if ($note !== null && ($note < 1 || $note > 5)) {
+            throw new \InvalidArgumentException('La note doit être comprise entre 1 et 5.');
+        }
+        
         $this->note = $note;
         return $this;
     }
