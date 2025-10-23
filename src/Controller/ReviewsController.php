@@ -25,7 +25,14 @@ final class ReviewsController extends AbstractController
     #[Route('/new', name: 'app_reviews_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        // Vérifier que l'utilisateur est connecté
+        $this->denyAccessUnlessGranted('ROLE_USER');
+        
         $review = new Reviews();
+        
+        // Définir automatiquement le client connecté
+        $review->setClient($this->getUser());
+        
         $form = $this->createForm(ReviewsType::class, $review);
         $form->handleRequest($request);
 
@@ -53,6 +60,13 @@ final class ReviewsController extends AbstractController
     #[Route('/{id}/edit', name: 'app_reviews_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Reviews $review, EntityManagerInterface $entityManager): Response
     {
+        // Vérifier que l'utilisateur est connecté et qu'il est le propriétaire de l'avis
+        $this->denyAccessUnlessGranted('ROLE_USER');
+        
+        if ($review->getClient() !== $this->getUser()) {
+            throw $this->createAccessDeniedException('Vous ne pouvez modifier que vos propres avis.');
+        }
+        
         $form = $this->createForm(ReviewsType::class, $review);
         $form->handleRequest($request);
 
