@@ -27,7 +27,25 @@
                 <td>{{ cake.description }}</td>
                 <td>{{ cake.price }}</td>
                 <td>{{ cake.quantity }}</td>
-                <td>{{ cake. }}</td>
+                <td>
+                    {% set averageRating = cake.getAverageRating() %}
+                    {% if averageRating > 0 %}
+                        <div class="rating-display">
+                            <span class="rating-value">{{ averageRating }}/5</span>
+                            <div class="stars">
+                                {% for i in 1..5 %}
+                                    {% if i <= averageRating %}
+                                        <span class="star filled">⭐</span>
+                                    {% else %}
+                                        <span class="star empty">☆</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <span class="no-rating text-muted">Pas encore noté</span>
+                    {% endif %}
+                </td>
                 <td>
                     {% if cake.image %}
                         <img src="{{ cake.image }}" alt="" style="max-width: 100px;">

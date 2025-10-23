@@ -1,3 +1,38 @@
 body {
     background-color: skyblue;
 }
+
+/* Styles pour l'affichage des notes */
+.rating-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rating-value {
+    font-weight: bold;
+    color: #ffc107;
+    font-size: 14px;
+}
+
+.stars {
+    display: flex;
+    gap: 2px;
+}
+
+.star {
+    font-size: 16px;
+}
+
+.star.filled {
+    color: #ffc107;
+}
+
+.star.empty {
+    color: #e0e0e0;
+}
+
+.no-rating {
+    font-style: italic;
+    font-size: 12px;
+}

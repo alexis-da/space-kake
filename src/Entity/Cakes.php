@@ -189,30 +189,38 @@ class Cakes
         return $this;
     }
 
-    public function getAverageRating(): ?float
+    /**
+     * Calcule la moyenne des notes des avis pour ce gâteau
+     * 
+     * @return float La moyenne des notes (0.0 si aucun avis ou aucune note valide)
+     */
+    public function getAverageRating(): float
     {
         $reviews = $this->getReviews();
-
+        
+        // Si aucun avis, retourner 0
         if ($reviews->isEmpty()) {
-            return null; // ou 0.0 si tu préfères afficher 0 au lieu de rien
+            return 0.0;
         }
-
-        $total = 0;
-        $count = 0;
-
+        
+        $validNotes = [];
+        
+        // Collecter toutes les notes valides (non null)
         foreach ($reviews as $review) {
-            if (method_exists($review, 'getNote') && $review->getNote() !== null) {
-                $total += $review->getNote();
-
-                $count++;
+            $note = $review->getNote();
+            if ($note !== null && $note > 0) {
+                $validNotes[] = (int) $note;
             }
         }
-
-        if ($count === 0) {
-            return null;
+        
+        // Si aucune note valide, retourner 0
+        if (empty($validNotes)) {
+            return 0.0;
         }
-
-        return round($total / $count, 1);
+        
+        // Calculer la moyenne et arrondir à 1 décimale
+        $average = array_sum($validNotes) / count($validNotes);
+        
+        return (float) round($average, 1);
     }
-
 }
