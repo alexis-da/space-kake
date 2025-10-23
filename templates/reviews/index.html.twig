@@ -19,7 +19,24 @@
             <tr>
                 <td>{{ review.title }}</td>
                 <td>{{ review.content }}</td>
-                <td>{{ review.note }}</td>
+                <td>
+                    {% if review.note %}
+                        <div class="rating-display">
+                            <span class="rating-value">{{ review.note }}/5</span>
+                            <div class="stars">
+                                {% for i in 1..5 %}
+                                    {% if i <= review.note %}
+                                        <span class="star filled">⭐</span>
+                                    {% else %}
+                                        <span class="star empty">☆</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <span class="no-rating text-muted">Pas de note</span>
+                    {% endif %}
+                </td>
                 <td>
                     <a href="{{ path('app_reviews_show', {'id': review.id}) }}">show</a>
                     <a href="{{ path('app_reviews_edit', {'id': review.id}) }}">edit</a>
