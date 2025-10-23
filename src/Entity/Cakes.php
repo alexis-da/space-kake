@@ -188,4 +188,31 @@ class Cakes
 
         return $this;
     }
+
+    public function getAverageRating(): ?float
+    {
+        $reviews = $this->getReviews();
+
+        if ($reviews->isEmpty()) {
+            return null; // ou 0.0 si tu préfères afficher 0 au lieu de rien
+        }
+
+        $total = 0;
+        $count = 0;
+
+        foreach ($reviews as $review) {
+            if (method_exists($review, 'getNote') && $review->getNote() !== null) {
+                $total += $review->getNote();
+
+                $count++;
+            }
+        }
+
+        if ($count === 0) {
+            return null;
+        }
+
+        return round($total / $count, 1);
+    }
+
 }
