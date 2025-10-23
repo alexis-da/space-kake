@@ -29,10 +29,13 @@
                         <img src="{{ cake.image }}" alt="" style="max-width: 100px;">
                     {% endif %}
                 </td>
-                <td>
-                    <a href="{{ path('app_cakes_show', {'id': cake.id}) }}">show</a>
-                    <a href="{{ path('app_cakes_edit', {'id': cake.id}) }}">edit</a>
-                </td>
+                {% if app.user and app.user.isAdmin %}
+                    <td>
+                        <a href="{{ path('app_cakes_show', {'id': cake.id}) }}">show</a>
+                        <a href="{{ path('app_cakes_edit', {'id': cake.id}) }}">edit</a>
+                        {{ include('cakes/_delete_form.html.twig') }}
+                    </td>
+                {% endif %}
                 <td>
                     {% if cake.quantity > 0 %}
                         <form action="{{ path('app_cakes_add_to_cart', {'id': cake.id}) }}" method="POST">
@@ -54,3 +57,5 @@
 
     <a href="{{ path('app_cakes_new') }}" class="btn btn-primary mt-3">Créer un nouveau gâteau</a>
 {% endblock %}
+
+

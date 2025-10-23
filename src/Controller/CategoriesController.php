@@ -17,14 +17,23 @@ final class CategoriesController extends AbstractController
     #[Route(name: 'app_categories_index', methods: ['GET'])]
     public function index(CategoriesRepository $categoriesRepository): Response
     {
+        $user = $this->getUser();
+        $isAdmin = $user && $user->isAdmin();
+
         return $this->render('categories/index.html.twig', [
             'categories' => $categoriesRepository->findAll(),
+            'isAdmin' => $isAdmin,
         ]);
     }
 
     #[Route('/new', name: 'app_categories_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        if (!$user || !$user->isAdmin()) {
+            throw $this->createAccessDeniedException('Accès refusé. Vous devez être administrateur.');
+        }
+
         $category = new Categories();
         $form = $this->createForm(CategoriesType::class, $category);
         $form->handleRequest($request);
@@ -33,7 +42,7 @@ final class CategoriesController extends AbstractController
             $entityManager->persist($category);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_categories_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_categories_index');
         }
 
         return $this->render('categories/new.html.twig', [
@@ -45,21 +54,30 @@ final class CategoriesController extends AbstractController
     #[Route('/{id}', name: 'app_categories_show', methods: ['GET'])]
     public function show(Categories $category): Response
     {
+        $user = $this->getUser();
+        $isAdmin = $user && $user->isAdmin();
+
         return $this->render('categories/show.html.twig', [
             'category' => $category,
+            'isAdmin' => $isAdmin,
         ]);
     }
 
     #[Route('/{id}/edit', name: 'app_categories_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Categories $category, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        if (!$user || !$user->isAdmin()) {
+            throw $this->createAccessDeniedException('Accès refusé. Vous devez être administrateur.');
+        }
+
         $form = $this->createForm(CategoriesType::class, $category);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_categories_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_categories_index');
         }
 
         return $this->render('categories/edit.html.twig', [
@@ -71,11 +89,16 @@ final class CategoriesController extends AbstractController
     #[Route('/{id}', name: 'app_categories_delete', methods: ['POST'])]
     public function delete(Request $request, Categories $category, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$category->getId(), $request->getPayload()->getString('_token'))) {
+        $user = $this->getUser();
+        if (!$user || !$user->isAdmin()) {
+            throw $this->createAccessDeniedException('Accès refusé. Vous devez être administrateur.');
+        }
+
+        if ($this->isCsrfTokenValid('delete' . $category->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($category);
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_categories_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_categories_index');
     }
 }
