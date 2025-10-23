@@ -40,6 +40,13 @@
             </table>
             <button type="submit" class="btn btn-primary">Mettre à jour le panier</button>
         </form>
+        {# Bouton Valider le panier #}
+        <form action="{{ path('orders_checkout') }}" method="post" class="mt-3">
+            <button type="submit" class="btn btn-success">
+                Valider le panier
+            </button>
+        </form>
+
 
         <p><strong>Total du panier : </strong> {{ order.totalPrice }}</p>
     {% else %}
