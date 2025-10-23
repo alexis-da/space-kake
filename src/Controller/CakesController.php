@@ -11,9 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Bundle\SecurityBundle\Security;
 use Psr\Log\LoggerInterface;
-
 
 #[Route('/cakes')]
 final class CakesController extends AbstractController
@@ -29,6 +27,13 @@ final class CakesController extends AbstractController
     #[Route('/new', name: 'app_cakes_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+
+        // ✅ Vérifie si l'utilisateur est admin
+        if (!$user || !$user->isAdmin()) {
+            throw $this->createAccessDeniedException('Accès réservé aux administrateurs.');
+        }
+
         $cake = new Cakes();
         $form = $this->createForm(CakesType::class, $cake);
         $form->handleRequest($request);
@@ -37,7 +42,7 @@ final class CakesController extends AbstractController
             $entityManager->persist($cake);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_cakes_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_cakes_index');
         }
 
         return $this->render('cakes/new.html.twig', [
@@ -57,13 +62,20 @@ final class CakesController extends AbstractController
     #[Route('/{id}/edit', name: 'app_cakes_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Cakes $cake, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+
+        // ✅ Vérifie si l'utilisateur est admin
+        if (!$user || !$user->isAdmin()) {
+            throw $this->createAccessDeniedException('Accès réservé aux administrateurs.');
+        }
+
         $form = $this->createForm(CakesType::class, $cake);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_cakes_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_cakes_index');
         }
 
         return $this->render('cakes/edit.html.twig', [
@@ -75,18 +87,26 @@ final class CakesController extends AbstractController
     #[Route('/{id}', name: 'app_cakes_delete', methods: ['POST'])]
     public function delete(Request $request, Cakes $cake, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$cake->getId(), $request->request->get('_token'))) {
+        $user = $this->getUser();
+
+        // ✅ Vérifie si l'utilisateur est admin
+        if (!$user || !$user->isAdmin()) {
+            throw $this->createAccessDeniedException('Accès réservé aux administrateurs.');
+        }
+
+        if ($this->isCsrfTokenValid('delete' . $cake->getId(), $request->request->get('_token'))) {
             $entityManager->remove($cake);
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_cakes_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_cakes_index');
     }
 
     #[Route('/{id}/add-to-cart', name: 'app_cakes_add_to_cart', methods: ['POST'])]
     public function addToCart(int $id, Request $request, EntityManagerInterface $em, OrdersRepository $ordersRepo, LoggerInterface $logger): Response
     {
         $user = $this->getUser();
+
         if (!$user) {
             throw $this->createAccessDeniedException();
         }
@@ -108,21 +128,12 @@ final class CakesController extends AbstractController
 
         $quantityToAdd = (int)$request->request->get('quantity', 1);
 
-        $logger->debug('Recherche d’un CakeOrder existant', ['cart_id' => $cart->getId(), 'cake_id' => $cake->getId()]);
-
-        // Rechercher en base un CakeOrder pour CE panier et CE gâteau
         $existingCakeOrder = $em->getRepository(\App\Entity\CakeOrder::class)
             ->findOneBy(['orders' => $cart, 'cake' => $cake]);
 
         if ($existingCakeOrder) {
-            $logger->info('CakeOrder existant — mise à jour quantité', [
-                'cakeOrder_id' => $existingCakeOrder->getId(),
-                'old_quantity' => $existingCakeOrder->getQuantityCake(),
-                'add' => $quantityToAdd
-            ]);
             $existingCakeOrder->setQuantityCake($existingCakeOrder->getQuantityCake() + $quantityToAdd);
         } else {
-            $logger->info('Aucun CakeOrder existant — création', ['cart_id' => $cart->getId(), 'cake_id' => $cake->getId()]);
             $cakeOrder = new \App\Entity\CakeOrder();
             $cakeOrder->setCake($cake);
             $cakeOrder->setQuantityCake($quantityToAdd);
@@ -130,18 +141,15 @@ final class CakesController extends AbstractController
             $em->persist($cakeOrder);
         }
 
-        // Recalcul total
+        // Recalcul du total
         $total = 0.0;
         foreach ($cart->getCakeOrders() as $co) {
             $total += $co->getCake()->getPrice() * $co->getQuantityCake();
         }
         $cart->setTotalPrice($total);
 
-        $logger->debug('Avant flush', ['cart_id' => $cart->getId(), 'total' => $total]);
         $em->flush();
-        $logger->debug('Après flush', ['cart_id' => $cart->getId()]);
 
         return $this->redirectToRoute('orders_show');
     }
-
 }
