@@ -1,0 +1,8 @@
+Un client peux parcourir les gâteaux.
+Un client peux ajouter un produit au panier.
+Un client peux valider le panier.
+Un client peux ajouter un avis.
+
+Admin peux ajouter des gâteaux au catalogue.
+Admin peux supprimer des gâteaux.
+Admin peux modifier un gâteaux.
